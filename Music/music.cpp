@@ -10,9 +10,14 @@
 #include "notes.hpp"
 // Map keyboard keys to frequencies
 bool skipnote = false;
+int octave = 4;
+int bpm = 120;
+int tempo = 1;
+int duration = 60000 / bpm * tempo;
+
 std::map<char, float> keyToFreq = {
-    {'a', C}, {'s', D}, {'d', E}, {'f', F}, {'g', G}, {'h', A}, {'j', B},
-    {'z', C_Sharp}, {'x', D_Sharp}, {'c', F_Sharp}, {'v', G_Sharp}, {'b', A_Sharp},
+    {'C', C}, {'D', D}, {'E', E}, {'F', F}, {'G', G}, {'A', A}, {'B', B},
+    {'c', C_Sharp}, {'d', D_Sharp}, {'e', E_Sharp}, {'f', F_Sharp}, {'g', G_Sharp}, {'a', A_Sharp},
 };
 
 void generateSineWave(int16_t* buffer, int numSamples, double frequency) {
@@ -21,16 +26,22 @@ void generateSineWave(int16_t* buffer, int numSamples, double frequency) {
     }
 }
 
-void playFrequency(pa_simple* pa, float frequency, int duration) {
+void playFrequency(pa_simple* pa, float frequency) {
     std::cout << "Playing: " << frequency << " Hz for " << duration << " ms\n";
 
+    if (skipnote) { duration = 200; }
     int numSamples = SAMPLE_RATE * duration / 1000;
     int16_t* buffer = new int16_t[numSamples];
     if (!buffer) {
         std::cerr << "Failed to allocate audio buffer\n";
         return;
     }
-    generateSineWave(buffer, numSamples, frequency);
+    for (int i = 0; i < 2; ++i) {
+        generateSineWave(buffer, numSamples, frequency);
+    }
+
+
+    //generateSineWave(buffer, numSamples, frequency);
 
     int error;
     if (pa_simple_write(pa, buffer, numSamples * sizeof(int16_t), &error) < 0) {
@@ -46,8 +57,6 @@ void playFrequency(pa_simple* pa, float frequency, int duration) {
 
 // Function to interpret and play a song string
 void playSong(pa_simple* pa, const std::string& song) {
-    int octave = 4;
-    int duration = 400;
     for (char key : song) {
         if (key == '+') {
             if (octave < 8) octave++;
@@ -56,11 +65,19 @@ void playSong(pa_simple* pa, const std::string& song) {
         } else if (key == 'P') {
             skipnote = !skipnote;
             std::cout << (skipnote ? "Pausing" : "Resuming") << "\n";
+        } else if (key == '1') {
+            duration = 60000 / bpm * 1;
+        } else if (key == '2') {
+            duration = 60000 / bpm * 2;
+        } else if (key == '3') {
+            duration = 60000 / bpm * 3;
+        } else if (key == '4') {
+            duration = 60000 / bpm * 4;
         } else {
             auto it = keyToFreq.find(key);
             if (it != keyToFreq.end()) {
                 float frequency = it->second * pow(2, octave - 4);
-                playFrequency(pa, frequency, duration);
+                playFrequency(pa, frequency);
             } else {
                 std::cout << "Unknown key: " << key << "\n";
             }
@@ -84,9 +101,12 @@ int main() {
         return 1;
     }
 
-    // Chopsticks: FE * 6 , DF * 6
-    std::string song = "fdPfdPfdPfdPfdPfdPPsfPsfPsfPsfPsfPsfPP";
+    // Chopsticks: FE * 6 , DF * 6 "fdfdPfdfdPffddPffddPffddPffddPPsfPsfPsfPsfPsfPsfPP"
+    std::string song = "-1FE1FE+1DF1DF-";
+    for (int i=0; i<3; i++) {
+        playSong(pa, song);
+        std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+    }
 
-    playSong(pa, song);
     return 0;
 }

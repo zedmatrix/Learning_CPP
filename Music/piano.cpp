@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include "notes.hpp"
 
-#define SAMPLE_RATE 44100
-#define AMPLITUDE 30000
 /*
     g++ -o piano piano.cpp -lpulse-simple -lpulse -lm
     ./piano
@@ -82,7 +80,6 @@ int main() {
             //std::cout << "Samples: " << numSamples << "\nBuffer:" << buffer << "\n";
 
             // Play the tone
-
             if (pa_simple_write(pa, buffer, numSamples * sizeof(int16_t), &error) < 0) {
                 std::cerr << "PulseAudio write error: " << pa_strerror(error) << "\n";
                 delete[] buffer;

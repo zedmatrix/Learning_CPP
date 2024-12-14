@@ -7,6 +7,7 @@ constexpr float C_Sharp = 277.18;
 constexpr float D = 293.66;
 constexpr float D_Sharp = 311.13;
 constexpr float E = 329.63;
+constexpr float E_Sharp = 346.23;
 constexpr float F = 349.23;
 constexpr float F_Sharp = 369.99;
 constexpr float G = 392.00;
@@ -24,6 +25,7 @@ constexpr float OCTAVE_DOWN = 0.5;
 /*
     g++ -o piano piano.cpp -lpulse-simple -lpulse -lm
     g++ -o music music.cpp -lpulse-simple -lpulse -lm
+    g++ -o chord chord.cpp -lpulse-simple -lpulse -lm
     ./piano
 */
 #endif // NOTES_HPP

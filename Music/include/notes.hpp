@@ -22,10 +22,5 @@ constexpr float OCTAVE_DOWN = 0.5;
 
 #define SAMPLE_RATE 44100
 #define AMPLITUDE 30000
-/*
-    g++ -o piano piano.cpp -lpulse-simple -lpulse -lm
-    g++ -o music music.cpp -lpulse-simple -lpulse -lm
-    g++ -o chord chord.cpp -lpulse-simple -lpulse -lm
-    ./piano
-*/
+
 #endif // NOTES_HPP

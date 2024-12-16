@@ -4,6 +4,7 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 #include <map>
+#include <termios.h>
 #include <unistd.h>
 #include "notes.hpp"
 #include "print.hpp"
@@ -54,8 +55,21 @@ bool PlayNote(pa_simple* pa, const int16_t* buffer, size_t numSamples) {
     return true;
 }
 
+// Function to capture a single key press
+char getKey() {
+    struct termios oldt, newt;
+    char ch;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    std::cin >> ch;
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return ch;
+}
+
 int main() {
-    const float duration = 0.75;
+    const float duration = 0.5;
     int numSamples;
     int16_t* buffer;
 
@@ -71,19 +85,20 @@ int main() {
         return 1;
     }
 
-    print("Press keys (a, s, d, f, g, h, j and z, x, c, v, b) to play tones.\n(+, - to change octaves) Press Q to quit.\n");
+    print("Press keys (a, s, d, f, g, h, j and z, x, c, v, b) to play tones.\n(+, - to change octaves)\nPress ESC to quit.\n");
 
-    char key;
+    char keystroke;
     int octave = 4;
-    while (std::cin >> key) {
-        if (key == 'Q' || key == 'q') break;
-        if (key == '-') {
+    while (keystroke = getKey()) {
+        if (keystroke == 27) break;
+        if (keystroke == '-') {
             if (octave > 0) octave--; continue;
         }
-        if (key == '+') {
+        if (keystroke == '+') {
             if (octave < 8) octave++; continue;
         }
-        auto it = keyToFreq.find(key);
+
+        auto it = keyToFreq.find(keystroke);
         if (it != keyToFreq.end()) {
             double frequency = it->second * pow(2, octave - 4);
 
@@ -92,23 +107,24 @@ int main() {
             int16_t* buffer = generateSineWave(numSamples, frequency);
 
             if (buffer) {
-                if (!PlayNote(pa, buffer, numSamples)) {
-                    std::cerr << "Failed to play note.\n";
+                if (PlayNote(pa, buffer, numSamples)) {
+                    delete[] buffer;
+                    buffer = nullptr;
                 }
-
             } else {
-
                 std::cerr << "Failed to allocate buffer.\n";
             }
-
         } else {
             print("Key not mapped to any tone.\n");
         }
     }
 
     // Cleanup
-    if (pa) {
+    if (buffer) {
         delete[] buffer;
+        buffer = nullptr;
+    }
+    if (pa) {
         pa_simple_free(pa);
     }
     return 0;

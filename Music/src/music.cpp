@@ -8,13 +8,15 @@
 #include <map>
 #include <unistd.h>
 #include "notes.hpp"
-// Map keyboard keys to frequencies
+
+// Define Globals
 bool skipnote = false;
 int octave = 4;
 int bpm = 120;
 int tempo = 1;
 int duration = 60000 / bpm * tempo;
 
+// Map Keys to Notes for Easy of use
 std::map<char, float> keyToFreq = {
     {'C', C}, {'D', D}, {'E', E}, {'F', F}, {'G', G}, {'A', A}, {'B', B},
     {'c', C_Sharp}, {'d', D_Sharp}, {'e', E_Sharp}, {'f', F_Sharp}, {'g', G_Sharp}, {'a', A_Sharp},

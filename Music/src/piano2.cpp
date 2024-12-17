@@ -9,8 +9,10 @@
 #include "notes.hpp"
 #include "print.hpp"
 
+int16_t* buffer;
+
 int16_t* generateSineWave(int numSamples, double frequency) {
-    int16_t* buffer = new int16_t[numSamples];
+    buffer = new int16_t[numSamples];
     if (!buffer) {
         return nullptr;
     }
@@ -71,7 +73,6 @@ char getKey() {
 int main() {
     const float duration = 0.5;
     int numSamples;
-    int16_t* buffer;
 
     // Map keyboard keys to frequencies
     std::map<char, float> keyToFreq = {
@@ -90,8 +91,7 @@ int main() {
 
     char keystroke;
     int octave = 4;
-    while (keystroke = getKey()) {
-        if (keystroke == 27) break;
+    while (keystroke != 27) {
         if (keystroke == '-') {
             if (octave > 0) octave--; continue;
         }
@@ -105,7 +105,7 @@ int main() {
 
             // Generate a short tone
             numSamples = SAMPLE_RATE * duration;
-            int16_t* buffer = generateSineWave(numSamples, frequency);
+            buffer = generateSineWave(numSamples, frequency);
 
             if (buffer) {
                 if (PlayNote(pa, buffer, numSamples)) {
@@ -118,11 +118,13 @@ int main() {
         } else {
             print("Key not mapped to any tone.\n");
         }
+        keystroke = getKey();
     }
 
     // Cleanup
     if (buffer) {
         delete[] buffer;
+        buffer = nullptr;
     }
     if (pa) {
         pa_simple_free(pa);

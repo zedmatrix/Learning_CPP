@@ -4,16 +4,17 @@ INCLUDE = -I./include
 BINDIR = ./bin
 SRCDIR = ./src
 
-.PHONY: default piano check clean
+.PHONY: default piano2 piano1 check clean
 
 default:
 	@echo "My Pulseaudio Programs"
-	@echo "make             will show this help message"
-	@echo "make check       will verify and create necessary directories"
-	@echo "make piano       will create the piano program"
-	@echo "make music	will create the automatic music program"
-	@echo "make noise	experimental version"
-
+	@echo "make		Show This Help Message"
+	@echo "make check	Verify and Create Necessary Directories"
+	@echo "make piano2	New Version with Flats and Inkey"
+	@echo "make piano1	First Version prototype"
+	@echo "make piano	Creates Both Versions"
+	@echo "make music	An Experimental Version that is Automatic"
+	@echo "make chord	An Experimental Version that is Automatic"
 
 check:
 	@echo "Checking directories..."
@@ -21,9 +22,13 @@ check:
 	@[ -d $(BINDIR) ] || (echo "Creating $(BINDIR)"; mkdir -p $(BINDIR))
 	@echo "All directories are in place."
 
-piano: $(BINDIR)/piano
+piano: $(BINDIR)/piano1 $(BINDIR)/piano2
 
-$(BINDIR)/piano: $(SRCDIR)/piano.cpp
+$(BINDIR)/piano1: $(SRCDIR)/piano1.cpp
+	mkdir -p $(BINDIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -o $@
+
+$(BINDIR)/piano2: $(SRCDIR)/piano2.cpp
 	mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -o $@
 
@@ -33,9 +38,9 @@ $(BINDIR)/music: $(SRCDIR)/music.cpp
 	mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -o $@
 
-noise: $(BINDIR)/noise
+chord: $(BINDIR)/chord
 
-$(BINDIR)/noise: $(SRCDIR)/noise.cpp
+$(BINDIR)/chord: $(SRCDIR)/chord.cpp
 	mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -o $@
 

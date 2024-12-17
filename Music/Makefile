@@ -23,6 +23,8 @@ check:
 	@echo "All directories are in place."
 
 piano: $(BINDIR)/piano1 $(BINDIR)/piano2
+piano1: $(BINDIR)/piano1
+piano2: $(BINDIR)/piano2
 
 $(BINDIR)/piano1: $(SRCDIR)/piano1.cpp
 	mkdir -p $(BINDIR)

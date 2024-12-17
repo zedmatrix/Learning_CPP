@@ -77,6 +77,7 @@ int main() {
     std::map<char, float> keyToFreq = {
         {'a', C}, {'s', D}, {'d', E}, {'f', F}, {'g', G}, {'h', A}, {'j', B},
         {'z', C_Sharp}, {'x', D_Sharp}, {'c', F_Sharp}, {'v', G_Sharp}, {'b', A_Sharp},
+        {'w', C_Flat}, {'e', D_Flat}, {'r', E_Flat}, {'t', F_Flat}, {'y', G_Flat}, {'u', A_Flat}, {'i', B_Flat},
     };
 
     pa_simple* pa = InitPulseAudio();
@@ -122,7 +123,6 @@ int main() {
     // Cleanup
     if (buffer) {
         delete[] buffer;
-        buffer = nullptr;
     }
     if (pa) {
         pa_simple_free(pa);

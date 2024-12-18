@@ -8,18 +8,18 @@
 #include <map>
 #include <unistd.h>
 #include "notes.hpp"
+#include "print.hpp"
 
-// Define Globals
-bool skipnote = false;
+// Globals
 int octave = 4;
 int bpm = 120;
 int tempo = 1;
 int duration = 60000 / bpm * tempo;
 
-// Map Keys to Notes for Easy of use
+// Map keys to frequencies (from notes.hpp)
 std::map<char, float> keyToFreq = {
-    {'C', C}, {'D', D}, {'E', E}, {'F', F}, {'G', G}, {'A', A}, {'B', B},
-    {'c', C_Sharp}, {'d', D_Sharp}, {'e', E_Sharp}, {'f', F_Sharp}, {'g', G_Sharp}, {'a', A_Sharp},
+    {'c', C}, {'d', D}, {'e', E}, {'f', F}, {'g', G}, {'a', A}, {'b', B},
+    {'C', C_Sharp}, {'D', D_Sharp}, {'E', E_Sharp}, {'F', F_Sharp}, {'G', G_Sharp}, {'A', A_Sharp},
 };
 
 void generateSineWave(int16_t* buffer, int numSamples, double frequency) {
@@ -46,36 +46,58 @@ void playFrequency(pa_simple* pa, float frequency) {
         delete[] buffer;
         return;
     }
-    //if (skipnote) std::this_thread::sleep_for(std::chrono::milliseconds(duration)); skipnote = !skipnote;
 }
 
 // Function to interpret and play a song string
 void playSong(pa_simple* pa, const std::string& song) {
+    bool SetOctave {false};
+    bool SetTempo {false};
     for (char key : song) {
-        if (key == '+') {
-            if (octave < 8) octave++;
-        } else if (key == '-') {
-            if (octave > 0) octave--;
-        } else if (key == ' ') {
+        if (key == ' ') {
+            std::this_thread::sleep_for(std::chrono::milliseconds(duration));
             continue;
-            //std::cout << (skipnote ? "Pausing" : "Resuming") << "\n";
-        } else if (key == '1') {
-            tempo = 1;
-        } else if (key == '2') {
-            tempo = 2;
-        } else if (key == '3') {
-            tempo = 3;
-        } else if (key == '4') {
-            tempo = 4;
-        } else {
-            auto it = keyToFreq.find(key);
-            if (it != keyToFreq.end()) {
-                float frequency = it->second * pow(2, octave - 4);
-                playFrequency(pa, frequency);
+        }
+        if (key == 'o') {
+            SetOctave = true;
+            continue;
+        }
+        if (SetOctave) {
+            if (key >= '1' && key <= '7') {
+                octave = key - '0';
+                print("Octave: {}\n", key);
+                SetOctave = false;
+                continue;
             } else {
-                std::cout << "Unknown key: " << key << "\n";
+                std::cerr << "Invalid Octave." << key <<"\n";
+                SetOctave = false;
+                continue;
             }
         }
+
+        if (key == 't') {
+            SetTempo = true;
+            continue;
+        }
+        if (SetTempo) {
+            if (key >= '1' && key <= '4') {
+                tempo = key - '0';
+                print("Tempo: {}\n", key);
+                SetTempo = false;
+                continue;
+            } else {
+                std::cerr << "Invalid Tempo." << key <<"\n";
+                SetTempo = false;
+                continue;
+            }
+        }
+        auto it = keyToFreq.find(key);
+        if (it != keyToFreq.end()) {
+            float frequency = it->second * pow(2, octave - 4);
+            playFrequency(pa, frequency);
+        } else {
+            std::cerr << "Unknown key: " << key << "\n";
+        }
+
     }
 }
 
@@ -95,10 +117,10 @@ int main() {
         return 1;
     }
 
-    // CDEFGAB and cdefga
-    // Chopsticks: FE * 6 , DF * 6 "fdfdPfdfdPffddPffddPffddPffddPPsfPsfPsfPsfPsfPsfPP"
-    std::string song = "1-FGc  FGc  FGc  +FG  FG  FG";
+    // sharps=CDEFGA  normal=cdefgab
+    std::string song = "t2o1cdefgab o2cdefgab o3cdefgab o4cdefgab o5cdefgab o6cdefgab t1o7cdefgab";
     playSong(pa, song);
+
     // for (int i=0; i<3; i++) {
     //     playSong(pa, song);
     //     std::this_thread::sleep_for(std::chrono::milliseconds(duration));

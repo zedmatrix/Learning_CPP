@@ -56,7 +56,6 @@ public:
         connect(LinkCHEK, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://chekplus.ca/"));
         });
-
         connect(LinkCBCGem, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://gem.cbc.ca"));
         });
@@ -74,7 +73,7 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
     BrowserWindow window;
-    window.resize(1024, 640);
+    window.resize(800, 600);
     window.show();
 
     return app.exec();

@@ -11,7 +11,7 @@ class BrowserWindow : public QMainWindow {
 public:
     BrowserWindow() {
         webView = new QWebEngineView(this);
-        webView->setUrl(QUrl("https://www.primevideo.com/"));
+        webView->setUrl(QUrl("https://www.google.com/"));
         setCentralWidget(webView);
 
         QMenuBar *menuBar = this->menuBar();
@@ -40,6 +40,7 @@ public:
         QAction *LinkTubi = linksMenu->addAction("Tubi");
         QAction *LinkPluto = linksMenu->addAction("Pluto");
         QAction *LinkYoutube = linksMenu->addAction("YouTube");
+        QAction *LinkPrime = linksMenu->addAction("Prime Video");
         QAction *LinkCHEK = linksMenu->addAction("CHEK+ Victoria");
         QAction *LinkCBCGem = linksMenu->addAction("CBC Gem");
         QAction *LinkShout = linksMenu->addAction("Shout TV");
@@ -53,9 +54,13 @@ public:
         connect(LinkYoutube, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://www.youtube.com"));
         });
+        connect(LinkPrime, &QAction::triggered, this, [this]() {
+            webView->setUrl(QUrl("https://www.primevideo.com"));
+        });
         connect(LinkCHEK, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://chekplus.ca/"));
         });
+
         connect(LinkCBCGem, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://gem.cbc.ca"));
         });
@@ -74,6 +79,7 @@ int main(int argc, char *argv[]) {
 
     BrowserWindow window;
     window.resize(800, 600);
+    //window.resize(1024, 768);
     window.show();
 
     return app.exec();

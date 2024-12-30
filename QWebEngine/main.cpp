@@ -1,16 +1,22 @@
-#include <QApplication>
-#include <QMenuBar>
-#include <QWebEngineView>
 #include <QMainWindow>
-#include <QAction>
+#include <QApplication>
+#include <QWebEngineView>
 #include <QWebEngineHistory>
+#include <QWebEngineProfile>
+#include <QMenuBar>
+#include <QAction>
 
 class BrowserWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     BrowserWindow() {
-        webView = new QWebEngineView(this);
+        QWebEngineProfile *profile = QWebEngineProfile::defaultProfile();
+        profile->setPersistentCookiesPolicy(QWebEngineProfile::ForcePersistentCookies);
+        profile->setCachePath("cache");
+        profile->setPersistentStoragePath("storage");
+
+        webView = new QWebEngineView();
         webView->setUrl(QUrl("https://www.google.com/"));
         setCentralWidget(webView);
 
@@ -19,7 +25,6 @@ public:
         QMenu *fileMenu = menuBar->addMenu("&File");
         QMenu *linksMenu = menuBar->addMenu("&Links");
 
-        // Create items for File menu
         QAction *backAction = fileMenu->addAction("Back");
         connect(backAction, &QAction::triggered, this, [this]() {
             if (webView->page()->history()->canGoBack())
@@ -36,14 +41,16 @@ public:
             backAction->setEnabled(webView->page()->history()->canGoBack());
         });
 
-        // Creat items for Links menu
         QAction *LinkTubi = linksMenu->addAction("Tubi");
         QAction *LinkPluto = linksMenu->addAction("Pluto");
         QAction *LinkYoutube = linksMenu->addAction("YouTube");
+        QAction *LinkDiscovery = linksMenu->addAction("Discovery Plus");
+        QAction *LinkDisney = linksMenu->addAction("Disney Plus");
         QAction *LinkPrime = linksMenu->addAction("Prime Video");
         QAction *LinkCHEK = linksMenu->addAction("CHEK+ Victoria");
         QAction *LinkCBCGem = linksMenu->addAction("CBC Gem");
         QAction *LinkShout = linksMenu->addAction("Shout TV");
+        QAction *LinkHome = linksMenu->addAction("Google");
 
         connect(LinkTubi, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://www.tubi.com"));
@@ -54,18 +61,27 @@ public:
         connect(LinkYoutube, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://www.youtube.com"));
         });
+        connect(LinkDiscovery, &QAction::triggered, this, [this]() {
+            webView->setUrl(QUrl("https://www.discoveryplus.com/ca"));
+        });
+        connect(LinkDisney, &QAction::triggered, this, [this]() {
+            webView->setUrl(QUrl("https://www.disneyplus.com/en-gb/home"));
+        });
+
         connect(LinkPrime, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://www.primevideo.com"));
         });
         connect(LinkCHEK, &QAction::triggered, this, [this]() {
-            webView->setUrl(QUrl("https://chekplus.ca/"));
+            webView->setUrl(QUrl("https://chekplus.ca"));
         });
-
         connect(LinkCBCGem, &QAction::triggered, this, [this]() {
             webView->setUrl(QUrl("https://gem.cbc.ca"));
         });
         connect(LinkShout, &QAction::triggered, this, [this]() {
-            webView->setUrl(QUrl("https://www.shout-tv.com/"));
+            webView->setUrl(QUrl("https://www.shout-tv.com"));
+        });
+        connect(LinkHome, &QAction::triggered, this, [this]() {
+            webView->setUrl(QUrl("https://www.google.com"));
         });
 
     }
@@ -78,7 +94,8 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
     BrowserWindow window;
-    window.resize(800, 600);
+    //window.resize(800, 800);
+    window.resize(1280, 720);
     //window.resize(1024, 768);
     window.show();
 

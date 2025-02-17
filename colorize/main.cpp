@@ -4,10 +4,18 @@
 using std::cout;
 using std::endl;
 
+// format-style print()
+constexpr void print(const std::string_view str_fmt, auto&&... args) {
+    fputs(std::vformat(str_fmt, std::make_format_args(args...)).c_str(), stdout);
+}
+
 int main() {
-    std::string test = "test";
-    int x = 5;
-    cout << colorize("Hello, World! {}", Colors::RED, true, true, x) << endl;
-    cout << colorize("This is a {}.", Colors::GREEN, false, false, test) << endl;
+    std::string alice = "Alice";
+    std::string test = "This is a Test\n";
+
+    std::string hello = colorize("Hello, {}!\n", Colors::RED, true, true, alice);
+
+    print("{} {}", hello, test);
+    cout << "Done" << endl;
     return 0;
 }

@@ -29,11 +29,9 @@ void Sprite::init(float x, float y, float width, float height) {
     const int sides = 6;
     const float angleStep = 2.0f * M_PI / sides;
 
-    // Center point
     vertexData[0] = _x + _width;
     vertexData[1] = _y + _height;
 
-    // Pentagon outer points
     for (int i = 0; i < sides; i++) {
         float angle = i * angleStep;
         vertexData[2 + i * 2] = vertexData[0] + radius * cos(angle);

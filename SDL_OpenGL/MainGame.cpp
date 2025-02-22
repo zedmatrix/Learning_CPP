@@ -30,8 +30,9 @@ MainGame::~MainGame()
 
 void MainGame::run() {
     initSystems();
-    _sprite.init(70, 70, 50, 50);
+    _sprite.init(100, 100, 80, 80, 5);
 
+    _sprite.init(150, 150, 50, 50, 7);
     gameLoop();
 
 }

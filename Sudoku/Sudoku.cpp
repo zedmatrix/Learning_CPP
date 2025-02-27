@@ -17,7 +17,6 @@ void SudokuGame::playGame() {
     printBoard(board);
 
     std::array<std::array<char, 9>, 9> gameBoard = board;
-    //removeCells(gameBoard, 40); generic per board
     removeCells(gameBoard, 4); // per block removal
 
     std::cout << "Game Board:\n" << std::endl;
@@ -116,19 +115,6 @@ bool SudokuGame::fillBoard(std::array<std::array<char, 9>, 9>& board, int row, i
     return false;
 }
 
-// void SudokuGame::removeCells(std::array<std::array<char, 9>, 9>& gameBoard, int cellsToRemove) {
-//     int removed = 0;
-//     while (removed < cellsToRemove) {
-//         int row = std::rand() % 9;
-//         int col = std::rand() % 9;
-//
-//         if (gameBoard[row][col] != '.') {
-//             gameBoard[row][col] = '.';
-//             ++removed;
-//         }
-//     }
-// }
-
 void SudokuGame::removeCells(std::array<std::array<char, 9>, 9>& gameBoard, int maxPerBlock) {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -172,7 +158,7 @@ void SudokuGame::printBoard(const std::array<std::array<char, 9>, 9>& board) {
         for (int col = 0; col < 9; ++col) {
             std::cout << " " << board[row][col] << " |";
 
-            // Add double bar after each 3x3 block (excluding the last column)
+            // Add double bar after each 3x3 block
             if ((col + 1) % 3 == 0) {
                 std::cout << "|";
             }

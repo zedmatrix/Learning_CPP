@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -Werror -std=c++23
 PKG_CONFIG = pkg-config
 
 # Files
-SRC = main.cpp Sudoku.cpp
+SRC = main.cpp Sudoku.cpp fillBoard.cpp Input.cpp
 OBJ = $(SRC:.cpp=.o)
 TARGET = sudoku
 

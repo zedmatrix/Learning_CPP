@@ -18,7 +18,7 @@ private:
     bool fillBoard(std::array<std::array<char, 9>, 9>& board, int row = 0, int col = 0);
     bool isValidMove(const std::array<std::array<char, 9>, 9>& board, int row, int col, char num);
     void removeCells(std::array<std::array<char, 9>, 9>& gameBoard, int maxPerBlock);
-    
+
 };
 
 #endif

@@ -15,12 +15,11 @@ public:
     void drawBox(int topX, int topY, int bottomX, int bottomY, const std::string& color = "FFFFFF");
     void drawRect(int topX, int topY, int width, int height, const std::string& color = "777777");
     void present();
-
+    SDL_Renderer* getRenderer() { return renderer; };
 
 private:
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
-
     bool HextoRGBA(const std::string& color);
     int _red;
     int _green;

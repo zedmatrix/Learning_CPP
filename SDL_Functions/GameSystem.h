@@ -2,6 +2,7 @@
 #define GAMESYSTEM_H
 
 #include "MainWindow.h"
+#include "MainText.h"
 
 class GameSystem {
 
@@ -12,6 +13,7 @@ public:
 
 private:
     MainWindow window;
+    MainText mainText;
 };
 
 #endif //GAMESYSTEM_H

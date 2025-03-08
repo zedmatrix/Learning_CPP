@@ -54,3 +54,5 @@ print-vars:
 	@echo "GLEW_LIBS: $(GLEW_LIBS)"
 	@echo "TTF_CFLAGS: ${TTF_CFLAGS}"
 	@echo "TTF_LIBS: ${TTF_LIBS}"
+
+.PHONY: all clean print-vars $(OBJ_DIR)

@@ -11,7 +11,7 @@ void MainText::init(int fontSize) {
     if (TTF_Init() == -1) {
         std::cerr << "Failed to initialize SDL_ttf: " << TTF_GetError() << std::endl;
     }
-    font = TTF_OpenFont("times.ttf", fontSize);
+    font = TTF_OpenFont("fonts/timesbd.ttf", fontSize);
     if (!font) {
         std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
     }

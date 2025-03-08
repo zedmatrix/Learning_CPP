@@ -1,6 +1,6 @@
 # Compiler and flags
-CC = g++
-CFLAGS = -Wall -Wextra -std=c++23
+CXX = g++
+CXXFLAGS = -Wall -Wextra -std=c++23
 PKG_CONFIG = pkg-config
 
 # Dependency detection
@@ -8,8 +8,8 @@ SDL_CFLAGS  := $(shell $(PKG_CONFIG) --cflags sdl2)
 SDL_LIBS    := $(shell $(PKG_CONFIG) --libs sdl2)
 # GLEW_CFLAGS   := $(shell $(PKG_CONFIG) --cflags glew)
 # GLEW_LIBS   := $(shell $(PKG_CONFIG) --libs glew)
-# TTF_CFLAGS  := $(shell $(PKG_CONFIG) --cflags SDL2_ttf)
-# TTF_LIBS    := $(shell $(PKG_CONFIG) --libs SDL2_ttf)
+TTF_CFLAGS  := $(shell $(PKG_CONFIG) --cflags SDL2_ttf)
+TTF_LIBS    := $(shell $(PKG_CONFIG) --libs SDL2_ttf)
 
 #Ensure both SDL2 and GLEW are available
 ifeq ($(strip $(SDL_LIBS)),)
@@ -20,25 +20,32 @@ endif
 # endif
 
 # Final flags
-CFLAGS += $(SDL_CFLAGS) #$(GLEW_CFLAGS) $(TTF_CFLAGS)
-LDLIBS += $(SDL_LIBS) #$(GLEW_LIBS) $(TTF_LIBS)
+CXXFLAGS += $(SDL_CFLAGS) $(TTF_CFLAGS) #$(GLEW_CFLAGS)
+LDLIBS += $(SDL_LIBS) $(TTF_LIBS) #$(GLEW_LIBS)
 
-# Files
-SRC = main.cpp MainWindow.cpp GameSystem.cpp
-OBJ = $(SRC:.cpp=.o)
+# Source/Object files directory
+SRC_DIR := src
+OBJ_DIR := obj
+
+# Source files
+SRC := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC))
 TARGET = window_test
 
 # Build target
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDLIBS)
 
-%.o: %.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJ_DIR):
+	mkdir -pv $(OBJ_DIR)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf $(OBJ_DIR) $(TARGET)
 
 print-vars:
 	@echo "SDL_CFLAGS: $(SDL_CFLAGS)"

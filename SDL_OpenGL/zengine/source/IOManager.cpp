@@ -1,37 +1,37 @@
 #include "IOManager.hpp"
-#include "picopng.hpp"
-#include "Error.hpp"
+#include <iostream>
 #include <fstream>
-#include "zengine.hpp"
+#include <vector>
+#include <filesystem>
 
 namespace zengine {
 
-    bool IOManager::readFileToBuffer(std::string filePath, std::vector<unsigned char>& buffer) {
-        std::ifstream file(filePath, std::ios::binary);
-        if (file.fail()) {
-            std::perror(filePath.c_str());
+    bool IOManager::readFileToBuffer(std::string_view filePath, std::vector<unsigned char>& buffer) {
+        namespace fs = std::filesystem;
+
+        try {
+            if (!fs::exists(filePath) || !fs::is_regular_file(filePath)) {
+                std::cerr << "Error: File does not exist or is not a regular file.\n";
+                return false;
+            }
+
+            std::size_t fileSize = fs::file_size(filePath);
+            buffer.resize(fileSize);
+
+            std::ifstream file(std::string(filePath), std::ios::binary);
+            file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+            file.read(reinterpret_cast<char*>(buffer.data()), fileSize);
+        } catch (const std::exception& e) {
+            std::cerr << "File read error: " << e.what() << "\n";
             return false;
         }
-        //seek to end of file
-        file.seekg(0, std::ios::end);
 
-        // get file size
-        int fileSize = file.tellg();
-        file.seekg(0, std::ios::beg);
-
-        // reduce file size by any header bytes
-        fileSize -= file.tellg();
-
-        buffer.resize(fileSize);
-        file.read((char*)&(buffer[0]), fileSize);
-
-        file.close();
         return true;
-
     }
 
     //ImageLoader
-    GLTexture IOManager::loadPNG(std::string filePath) {
+    GLTexture IOManager::loadPNG(std::string_view filePath) {
         GLTexture texture{};
         std::vector<unsigned char> in;
         std::vector<unsigned char> out;

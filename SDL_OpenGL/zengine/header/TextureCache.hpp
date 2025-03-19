@@ -12,10 +12,11 @@ namespace zengine {
         TextureCache();
         ~TextureCache();
 
-        GLTexture getTexture(std::string texturePath);
+        GLTexture getTexture(std::string_view texturePath);
 
     private:
-        std::map<std::string, GLTexture> _textureMap;
+        std::map<std::string, GLTexture, std::less<>> _textureMap;
+
     };
 }
 

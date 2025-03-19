@@ -44,6 +44,7 @@ executable('opengl-test', main_src,
 # Install textures
 install_data('Textures/block_grid.png', install_dir: meson.project_build_root() / 'Textures')
 install_data('Textures/CharacterRight_Standing.png', install_dir: meson.project_build_root() / 'Textures')
+install_data('Textures/myCharacter_standing.png', install_dir: meson.project_build_root() / 'Textures')
 
 # Install shaders
 install_data('Shaders/FragmentShader', install_dir: meson.project_build_root() / 'Shaders')
@@ -53,6 +54,7 @@ install_data('Shaders/VertexShader', install_dir: meson.project_build_root() / '
 run_command(['mkdir', '-p', meson.project_build_root() / 'Textures'], check: true)
 run_command(['cp', 'Textures/block_grid.png', meson.project_build_root() / 'Textures/block_grid.png'], check: true)
 run_command(['cp', 'Textures/CharacterRight_Standing.png', meson.project_build_root() / 'Textures/CharacterRight_Standing.png'], check: true)
+run_command(['cp', 'Textures/myCharacter_standing.png', meson.project_build_root() / 'Textures/myCharacter_standing.png'], check: true)
 
 run_command(['mkdir', '-p', meson.project_build_root() / 'Shaders'], check: true)
 run_command(['cp', 'Shaders/FragmentShader', meson.project_build_root() / 'Shaders/FragmentShader'], check: true)

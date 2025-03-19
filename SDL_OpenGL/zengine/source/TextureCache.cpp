@@ -14,23 +14,22 @@ namespace zengine {
 
     }
 
-    GLTexture TextureCache::getTexture(std::string texturePath) {
+    GLTexture TextureCache::getTexture(std::string_view texturePath) {
 
-        // Lookup texture map in map
-        std::map<std::string, GLTexture>::iterator mit = _textureMap.find(texturePath);
+    // Lookup texture map in map using std::string_view
+    auto mit = _textureMap.find(texturePath);
 
-        if (mit == _textureMap.end()) {
-            GLTexture newTexture = IOManager::loadPNG(texturePath);
+    if (mit == _textureMap.end()) {
+        GLTexture newTexture = IOManager::loadPNG(texturePath);
 
-            std::pair<std::string, GLTexture> newPair(texturePath, newTexture);
+        // Construct std::string from std::string_view for map insertion
+        _textureMap.emplace(std::string(texturePath), newTexture);
 
-            _textureMap.insert(newPair);
-            std::cout << "New Texture Loaded!\n";
-            return newTexture;
-        }
-        std::cout << "Cached Texture Loaded!\n";
-        return mit->second;
-
+        std::cout << "New Texture Loaded!\n";
+        return newTexture;
     }
+    std::cout << "Cached Texture Loaded!\n";
+    return mit->second;
+}
 
 }

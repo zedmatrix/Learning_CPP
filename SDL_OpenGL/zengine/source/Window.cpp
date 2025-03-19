@@ -39,8 +39,9 @@ namespace zengine {
         if (error != GLEW_OK) {
             fatalError("Could not Initialize GLEW");
         }
-        const GLubyte* _version = glGetString(GL_VERSION);
-        std::cout << std::format("*** OpenGL Version: {} ***\n", reinterpret_cast<const char*>(_version));
+
+        // Get OpenGL version and output to terminal
+        std::cout << "*** OpenGL Version: " << glGetString(GL_VERSION) << " ***\n";
 
         //set background color dark-semi-transparent grey
         glClearColor(0.3f, 0.3f, 0.3f, 0.5f);

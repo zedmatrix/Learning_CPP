@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 #include <format>
-#include <print>
+#include <memory>
 #include "zengine.hpp"
 
 using namespace zengine;
@@ -39,7 +39,7 @@ private:
     float _fps;
     float _frameTime;
 
-    std::vector <Sprite*> _sprites;
+    std::vector<std::unique_ptr<Sprite>> _sprites;
     GLSLProgram _colorProgram;
 
 };

@@ -12,22 +12,19 @@ MainGame::MainGame () :
 }
 
 MainGame::~MainGame () {
-
 }
 
 void MainGame::run() {
     initSystems();
 
-    _sprites.push_back(new Sprite());
+    _sprites.push_back(std::make_unique<Sprite>());
     _sprites.back()->init(-0.5f, 0.5f, 0.5f, 0.5f, "Textures/block_grid.png");
 
-    _sprites.push_back(new Sprite());
-    _sprites.back()->init(-0.2f, -0.2f, 0.6f, 0.6f, "Textures/CharacterRight_Standing.png");
+    _sprites.push_back(std::make_unique<Sprite>());
+    _sprites.back()->init(-0.2f, -0.2f, 0.6f, 0.6f, "Textures/myCharacter_standing.png");
 
-    _sprites.push_back(new Sprite());
+    _sprites.push_back(std::make_unique<Sprite>());
     _sprites.back()->init(0.2f, -1.2f, 0.6f, 0.6f, "Textures/CharacterRight_Standing.png");
-    //_playerTexture = IOManager::loadPNG("src/Textures/PNG/CharacterRight_Standing.png");
-    //_playerTexture = IOManager::loadPNG("src/Textures/block_grid.png");
 
     gameLoop();
 
@@ -153,8 +150,3 @@ void MainGame::calculateFPS() {
         _fps = 60.0f;
     }
 }
-
-
-
-
-

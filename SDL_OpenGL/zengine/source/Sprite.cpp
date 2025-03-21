@@ -61,7 +61,7 @@ void Sprite::createRenderBatches() {
     vertices[currentVertex++] = _glyphs[0].topLeft;
     offset += 6;
 
-    for (int currentGlyph = 1; currentGlyph < _glyphs.size(); currentGlyph++) {
+    for (std::vector<Glyph>::size_type currentGlyph = 1; currentGlyph < _glyphs.size(); currentGlyph++) {
 
         if (_glyphs[currentGlyph].texture != _glyphs[currentGlyph - 1].texture) {
             _renderBatches.emplace_back(offset, 6, _glyphs[0].texture);

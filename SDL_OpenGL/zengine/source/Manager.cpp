@@ -84,3 +84,61 @@ GLTexture Manager::IO::loadPNG(std::string_view filePath) {
     return texture;
 
 }
+void Manager::Inkey::pressKey(uint32_t keyID) {
+    _keyMap[keyID] = true;
+}
+
+void Manager::Inkey::releaseKey(uint32_t keyID) {
+    _keyMap[keyID] = false;
+}
+
+bool Manager::Inkey::isKeyPressed(uint32_t keyID) {
+    auto it = _keyMap.find(keyID);
+    if (it != _keyMap.end()) {
+        return it->second;
+    }
+    return false;
+}
+float Manager::fps::end() {
+        calculateFPS();
+
+    //for fps limiting to _maxFPS
+    uint32_t frameTicks = SDL_GetTicks() - _startTicks;
+    if (1000.0f / _maxFPS > frameTicks) {
+        SDL_Delay(1000.0f / _maxFPS - frameTicks);
+    }
+    return _fps;
+}
+void Manager::fps::calculateFPS() {
+    static const int NUM_SAMPLES = 20;
+    static float frameTimes[NUM_SAMPLES];
+    static int currentFrame = 0;
+
+    static uint32_t prevTicks = SDL_GetTicks();
+    uint32_t currentTicks;
+    currentTicks = SDL_GetTicks();
+    _frameTime = currentTicks - prevTicks;
+    prevTicks = currentTicks;
+
+    frameTimes[currentFrame % NUM_SAMPLES] = _frameTime;
+
+    int count;
+    currentFrame++;
+    if (currentFrame < NUM_SAMPLES) {
+        count = currentFrame;
+    } else {
+        count = NUM_SAMPLES;
+    }
+
+    float frameTimeAverage = 0;
+    for (int i = 0; i < count; i++) {
+        frameTimeAverage += frameTimes[i];
+    }
+    frameTimeAverage /= count;
+
+    if (frameTimeAverage > 0) {
+        _fps = 1000.0f / frameTimeAverage;
+    } else {
+        _fps = _maxFPS;
+    }
+}

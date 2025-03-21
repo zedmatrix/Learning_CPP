@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
+#include "Manager.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -29,21 +30,21 @@ private:
     void gameLoop();
     void processInput();
     void drawGame();
-    void calculateFPS();
 
     Window _window;
     int _screenWidth;
     int _screenHeight;
     GameState _gameState;
     float _time;
-    float _maxFPS;
 
-    float _fps;
-    float _frameTime;
     Camera _camera;
-
     Sprite _sprites;
     GLSLProgram _colorProgram;
+    Manager::Inkey _inkey;
+
+    float _maxFPS;
+    float _fps;
+    Manager::fps _fpsLimiter;
 
 };
 

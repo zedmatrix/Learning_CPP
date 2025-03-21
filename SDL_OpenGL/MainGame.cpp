@@ -29,6 +29,7 @@ void MainGame::initSystems() {
 
     initShaders();
     _sprites.init();
+    _fpsLimiter.init(_maxFPS);
 }
 void MainGame::initShaders() {
     _colorProgram.compileShaders("Shaders/VertexShader", "Shaders/FragmentShader");
@@ -43,32 +44,26 @@ void MainGame::gameLoop() {
 
     static int frameCount = 0;
     while (_gameState != GameState::EXIT) {
-        float startTicks = SDL_GetTicks();
+        _fpsLimiter.begin();
 
         processInput();
         _time += 0.01;
         _camera.update();
         drawGame();
 
-        calculateFPS();
+        _fps = _fpsLimiter.end();
         frameCount++;
         if (frameCount > 10) {
             std::cout << std::format("Frames per Second: {} FPS\n", _fps);
             frameCount = 0;
         }
-
-        //for fps limiting to _maxFPS
-        float frameTicks = SDL_GetTicks() - startTicks;
-        if (1000.0f / _maxFPS > frameTicks) {
-            SDL_Delay(1000.0f / _maxFPS - frameTicks);
-        }
     }
-
 }
+
 void MainGame::processInput() {
 
     SDL_Event _event;
-    const float CAMERA_SPEED = 10.0f;
+    const float CAMERA_SPEED = 0.5f;
     const float SCALE_SPEED = 0.1f;
 
     while (SDL_PollEvent(&_event)) {
@@ -81,29 +76,21 @@ void MainGame::processInput() {
             //     break;
 
             case SDL_KEYDOWN:
-                switch (_event.key.keysym.sym) {
-                    case SDLK_UP:
-                        _camera.setPosition(_camera.getPosition() + glm::vec2(0.0f, CAMERA_SPEED));
-                        break;
-                    case SDLK_DOWN:
-                        _camera.setPosition(_camera.getPosition() + glm::vec2(0.0f, -CAMERA_SPEED));
-                        break;
-                    case SDLK_RIGHT:
-                        _camera.setPosition(_camera.getPosition() + glm::vec2(CAMERA_SPEED, 0.0f));
-                        break;
-                    case SDLK_LEFT:
-                        _camera.setPosition(_camera.getPosition() + glm::vec2(-CAMERA_SPEED, 0.0f));
-                        break;
-                    case SDLK_z:
-                        _camera.setScale(_camera.getScale() + SCALE_SPEED);
-                        break;
-                    case SDLK_x:
-                        _camera.setScale(_camera.getScale() - SCALE_SPEED);
-                        break;
-                }
+                _inkey.pressKey(_event.key.keysym.sym);
+                break;
+            case SDL_KEYUP:
+                _inkey.releaseKey(_event.key.keysym.sym);
                 break;
         }
     }
+    if (_inkey.isKeyPressed(SDLK_UP)) _camera.setPosition(_camera.getPosition() + glm::vec2(0.0f, CAMERA_SPEED));
+    if (_inkey.isKeyPressed(SDLK_DOWN)) _camera.setPosition(_camera.getPosition() + glm::vec2(0.0f, -CAMERA_SPEED));
+    if (_inkey.isKeyPressed(SDLK_RIGHT))_camera.setPosition(_camera.getPosition() + glm::vec2(CAMERA_SPEED, 0.0f));
+    if (_inkey.isKeyPressed(SDLK_LEFT)) _camera.setPosition(_camera.getPosition() + glm::vec2(-CAMERA_SPEED, 0.0f));
+    if (_inkey.isKeyPressed(SDLK_z)) _camera.setScale(_camera.getScale() + SCALE_SPEED);
+    if (_inkey.isKeyPressed(SDLK_x)) _camera.setScale(_camera.getScale() - SCALE_SPEED);
+
+
 }
 void MainGame::drawGame() {
     glClearDepth(1.0);
@@ -142,37 +129,4 @@ void MainGame::drawGame() {
     _colorProgram.unuse();
     _window.swapBuffer();
 
-}
-void MainGame::calculateFPS() {
-    static const int NUM_SAMPLES = 20;
-    static float frameTimes[NUM_SAMPLES];
-    static int currentFrame = 0;
-
-    static float prevTicks = SDL_GetTicks();
-    float currentTicks;
-    currentTicks = SDL_GetTicks();
-    _frameTime = currentTicks - prevTicks;
-    prevTicks = currentTicks;
-
-    frameTimes[currentFrame % NUM_SAMPLES] = _frameTime;
-
-    int count;
-    currentFrame++;
-    if (currentFrame < NUM_SAMPLES) {
-        count = currentFrame;
-    } else {
-        count = NUM_SAMPLES;
-    }
-
-    float frameTimeAverage = 0;
-    for (int i = 0; i < count; i++) {
-        frameTimeAverage += frameTimes[i];
-    }
-    frameTimeAverage /= count;
-
-    if (frameTimeAverage > 0) {
-        _fps = 1000.0f / frameTimeAverage;
-    } else {
-        _fps = 60.0f;
-    }
 }

@@ -2,14 +2,16 @@
 #define MAINGAME_HPP
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <format>
 #include <memory>
-#include "zengine.hpp"
-
-using namespace zengine;
+#include "Window.hpp"
+#include "Sprite.hpp"
+#include "Camera.hpp"
+#include "GLSLProgram.hpp"
 
 enum class GameState {PLAY, EXIT};
 
@@ -38,11 +40,11 @@ private:
 
     float _fps;
     float _frameTime;
+    Camera _camera;
 
-    std::vector<std::unique_ptr<Sprite>> _sprites;
+    Sprite _sprites;
     GLSLProgram _colorProgram;
 
 };
-
 
 #endif //MAINGAME_HPP

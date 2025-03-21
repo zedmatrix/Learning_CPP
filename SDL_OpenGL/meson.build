@@ -13,16 +13,12 @@ incdir = include_directories('zengine/header/')
 
 # Define Bengine source files
 zengine_src = files(
-    'zengine/source/Error.cpp',
+    'zengine/source/Camera.cpp',
     'zengine/source/GLSLProgram.cpp',
-    'zengine/source/IOManager.cpp',
+    'zengine/source/Manager.cpp',
     'zengine/source/picopng.cpp',
-    'zengine/source/ResourceManager.cpp',
     'zengine/source/Sprite.cpp',
-    'zengine/source/TextureCache.cpp',
-    'zengine/source/Window.cpp',
-    'zengine/source/zengine.cpp'
-)
+    'zengine/source/Window.cpp')
 
 # Build Zengine as a static library
 zengine_lib = library('zengine', zengine_src,

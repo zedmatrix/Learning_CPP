@@ -1,7 +1,5 @@
 #include "MainGame.hpp"
 
-using namespace zengine;
-
 MainGame::MainGame () :
     _screenWidth(800),
     _screenHeight(600),
@@ -9,6 +7,7 @@ MainGame::MainGame () :
     _time(0.0f),
     _maxFPS(60.0f) {
 
+    _camera.init(_screenWidth, _screenHeight);
 }
 
 MainGame::~MainGame () {
@@ -17,24 +16,19 @@ MainGame::~MainGame () {
 void MainGame::run() {
     initSystems();
 
-    _sprites.push_back(std::make_unique<Sprite>());
-    _sprites.back()->init(-0.5f, 0.5f, 0.5f, 0.5f, "Textures/block_grid.png");
-
-    _sprites.push_back(std::make_unique<Sprite>());
-    _sprites.back()->init(-0.2f, -0.2f, 0.6f, 0.6f, "Textures/myCharacter_standing.png");
-
-    _sprites.push_back(std::make_unique<Sprite>());
-    _sprites.back()->init(0.2f, -1.2f, 0.6f, 0.6f, "Textures/CharacterRight_Standing.png");
-
     gameLoop();
 
 }
 
 void MainGame::initSystems() {
-    init();
+    // Initialize Everything and Set Up Double Buffering
+    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
     _window.create("Game Engine", _screenWidth, _screenHeight, 0);
 
     initShaders();
+    _sprites.init();
 }
 void MainGame::initShaders() {
     _colorProgram.compileShaders("Shaders/VertexShader", "Shaders/FragmentShader");
@@ -53,6 +47,7 @@ void MainGame::gameLoop() {
 
         processInput();
         _time += 0.01;
+        _camera.update();
         drawGame();
 
         calculateFPS();
@@ -73,6 +68,8 @@ void MainGame::gameLoop() {
 void MainGame::processInput() {
 
     SDL_Event _event;
+    const float CAMERA_SPEED = 10.0f;
+    const float SCALE_SPEED = 0.1f;
 
     while (SDL_PollEvent(&_event)) {
         switch (_event.type) {
@@ -82,12 +79,29 @@ void MainGame::processInput() {
             // case SDL_MOUSEMOTION:
             //     std::cout << std::format("Mouse({},{})\n", _event.motion.y, _event.motion.x);
             //     break;
-            // case SDL_MOUSEWHEEL:
-            //     std::cout << std::format("Mouse({},{})\n", _event.wheel.y, _event.wheel.x);
-            //     break;
-            // default:
-            //     SDL_Log("Unhandled Event!");
-            //     break;
+
+            case SDL_KEYDOWN:
+                switch (_event.key.keysym.sym) {
+                    case SDLK_UP:
+                        _camera.setPosition(_camera.getPosition() + glm::vec2(0.0f, CAMERA_SPEED));
+                        break;
+                    case SDLK_DOWN:
+                        _camera.setPosition(_camera.getPosition() + glm::vec2(0.0f, -CAMERA_SPEED));
+                        break;
+                    case SDLK_RIGHT:
+                        _camera.setPosition(_camera.getPosition() + glm::vec2(CAMERA_SPEED, 0.0f));
+                        break;
+                    case SDLK_LEFT:
+                        _camera.setPosition(_camera.getPosition() + glm::vec2(-CAMERA_SPEED, 0.0f));
+                        break;
+                    case SDLK_z:
+                        _camera.setScale(_camera.getScale() + SCALE_SPEED);
+                        break;
+                    case SDLK_x:
+                        _camera.setScale(_camera.getScale() - SCALE_SPEED);
+                        break;
+                }
+                break;
         }
     }
 }
@@ -107,13 +121,25 @@ void MainGame::drawGame() {
     GLuint timeLocation = _colorProgram.getUniformLocation("time");
     glUniform1f(timeLocation, _time);
 
-    for (size_t i = 0; i < _sprites.size(); i++) {
-        _sprites[i]->draw();
-    }
+    //Set the camera matrix
+    GLuint pLocation = _colorProgram.getUniformLocation("P");
+    glm::mat4 cameraMatrix = _camera.getCameraMatrix();
+    glUniformMatrix4fv(pLocation, 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 
+    //Sprite Batch
+    _sprites.begin();
+    glm::vec4 pos(0.0f, 0.0f, 50.0f, 50.0f);
+    glm::vec4 uv(0.0f, 0.0f, 1.0f, 1.0f);
+    static GLTexture texture = Manager::getTexture("Textures/myCharacter_standing.png");
+    Color color{128, 128, 128, 255};
+
+    _sprites.draw(pos, uv, texture.id, 0.0f, color);
+    _sprites.end();
+    _sprites.renderBatch();
+
+    // unbind Texture
     glBindTexture(GL_TEXTURE_2D, 0);
     _colorProgram.unuse();
-
     _window.swapBuffer();
 
 }

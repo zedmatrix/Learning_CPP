@@ -1,29 +1,60 @@
 #ifndef SPRITE_HPP
 #define SPRITE_HPP
 #include <GL/glew.h>
-#include "GLTexture.hpp"
+#include <glm/glm.hpp>
+#include <algorithm>
+#include "Manager.hpp"
+#include "Vertex.hpp"
 
-namespace zengine {
+enum class GlyphSortType {
+    NONE,
+    FRONT_TO_BACK,
+    BACK_TO_FRONT,
+    TEXTURE
+};
 
-    class Sprite {
+struct RenderBatch {
+    GLuint offset;
+    GLuint numVertices;
+    GLuint texture;
 
-    public:
-        Sprite();
-        ~Sprite();
+    RenderBatch(GLuint off, GLuint numVerts, GLuint tex)
+        : offset(off), numVertices(numVerts), texture(tex) {}
+};
 
-        void init(float x, float y, float width, float height, std::string texturePath);
-        void draw();
+struct Glyph {
+    GLuint texture;
+    float depth;
 
-    private:
+    Vertex topLeft;
+    Vertex bottomLeft;
+    Vertex topRight;
+    Vertex bottomRight;
 
-        float _x;
-        float _y;
-        float _width;
-        float _height;
-        GLuint _vboID;
-        GLTexture _texture;
+};
 
-    };
-}
+class Sprite {
+
+public:
+    Sprite() : _vbo(0), _vao(0) {}
+
+    void init();
+    void begin(GlyphSortType sortType = GlyphSortType::TEXTURE);
+    void end();
+    void draw(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint texture, float depth, const Color& color);
+    void renderBatch();
+
+private:
+
+    void createRenderBatches();
+    void createVertexArray();
+    void sortGlyphs();
+    GLuint _vbo;
+    GLuint _vao;
+    std::vector<Glyph> _glyphs;
+    std::vector<RenderBatch> _renderBatches;
+    GlyphSortType _sortType;
+
+};
 
 #endif //SPRITE_HPP

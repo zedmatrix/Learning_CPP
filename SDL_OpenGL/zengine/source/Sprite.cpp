@@ -1,93 +1,134 @@
-#include <cstddef>
-#include <random>
 #include "Sprite.hpp"
-#include "Vertex.hpp"
-#include "ResourceManager.hpp"
-#include "zengine.hpp"
 
-namespace zengine {
+void Sprite::init() {
+    createVertexArray();
 
-    Sprite::Sprite() {
-        _vboID = 0;
-    }
+}
 
-    Sprite::~Sprite() {
-        if (_vboID != 0) {
-            glDeleteBuffers(1, &_vboID);
+void Sprite::begin(GlyphSortType sortType /*GlyphSortType::TEXTURE */) {
+    _sortType = sortType;
+    _renderBatches.clear();
+    _glyphs.clear();
+}
+
+void Sprite::end() {
+    sortGlyphs();
+    createRenderBatches();
+}
+
+void Sprite::draw(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint texture, float depth, const Color& color) {
+
+    Glyph newGlyph;
+    newGlyph.texture = texture;
+    newGlyph.depth = depth;
+
+    // Set up vertices using setter functions
+    newGlyph.topLeft.setPos(destRect.x, destRect.y + destRect.w);
+    newGlyph.topLeft.setUV(uvRect.x, uvRect.y + uvRect.w);
+    newGlyph.topLeft.color = color;
+
+    newGlyph.bottomLeft.setPos(destRect.x, destRect.y);
+    newGlyph.bottomLeft.setUV(uvRect.x, uvRect.y);
+    newGlyph.bottomLeft.color = color;
+
+    newGlyph.topRight.setPos(destRect.x + destRect.z, destRect.y + destRect.w);
+    newGlyph.topRight.setUV(uvRect.x + uvRect.z, uvRect.y + uvRect.w);
+    newGlyph.topRight.color = color;
+
+    newGlyph.bottomRight.setPos(destRect.x + destRect.z, destRect.y);
+    newGlyph.bottomRight.setUV(uvRect.x + uvRect.z, uvRect.y);
+    newGlyph.bottomRight.color = color;
+
+    // Add to the list
+    _glyphs.emplace_back(std::move(newGlyph));
+
+}
+
+void Sprite::createRenderBatches() {
+    std::vector <Vertex> vertices;
+    vertices.resize(_glyphs.size() * 6);
+
+    if (_glyphs.empty()) return;
+
+    int offset{0};
+    int currentVertex{0};
+    _renderBatches.emplace_back(offset, 6, _glyphs[0].texture);
+    vertices[currentVertex++] = _glyphs[0].topLeft;
+    vertices[currentVertex++] = _glyphs[0].bottomLeft;
+    vertices[currentVertex++] = _glyphs[0].bottomRight;
+    vertices[currentVertex++] = _glyphs[0].bottomRight;
+    vertices[currentVertex++] = _glyphs[0].topRight;
+    vertices[currentVertex++] = _glyphs[0].topLeft;
+    offset += 6;
+
+    for (int currentGlyph = 1; currentGlyph < _glyphs.size(); currentGlyph++) {
+
+        if (_glyphs[currentGlyph].texture != _glyphs[currentGlyph - 1].texture) {
+            _renderBatches.emplace_back(offset, 6, _glyphs[0].texture);
+        } else {
+            _renderBatches.back().numVertices += 6;
         }
-    }
-    void Sprite::init(float x, float y, float width, float height, std::string texturePath) {
-        _x = x;
-        _y = y;
-        _width = width;
-        _height = height;
-        _texture = ResourceManager::getTexture(texturePath);
+        vertices[currentVertex++] = _glyphs[currentGlyph].topLeft;
+        vertices[currentVertex++] = _glyphs[currentGlyph].bottomLeft;
+        vertices[currentVertex++] = _glyphs[currentGlyph].bottomRight;
+        vertices[currentVertex++] = _glyphs[currentGlyph].bottomRight;
+        vertices[currentVertex++] = _glyphs[currentGlyph].topRight;
+        vertices[currentVertex++] = _glyphs[currentGlyph].topLeft;
+        offset += 6;
 
-        if (_vboID == 0) {
-            glGenBuffers(1, &_vboID);
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+void Sprite::createVertexArray() {
+    if (_vao == 0) glGenVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
+
+    if (_vbo == 0) glGenBuffers(1, &_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+
+    // Position Attribute pointer // (void*)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+
+    glBindVertexArray(0);
+}
+
+void Sprite::sortGlyphs() {
+    switch (_sortType) {
+        case GlyphSortType::FRONT_TO_BACK:
+            std::stable_sort(_glyphs.begin(), _glyphs.end(),
+                [](const Glyph& a, const Glyph& b) { return a.depth < b.depth; });
+            break;
+        case GlyphSortType::BACK_TO_FRONT:
+            std::stable_sort(_glyphs.begin(), _glyphs.end(),
+                [](const Glyph& a, const Glyph& b) { return a.depth > b.depth; });
+            break;
+        case GlyphSortType::TEXTURE:
+            std::stable_sort(_glyphs.begin(), _glyphs.end(),
+                [](const Glyph& a, const Glyph& b) { return a.texture < b.texture; });
+            break;
+        case GlyphSortType::NONE:
+            break;
+    }
+}
+void Sprite::renderBatch() {
+    glBindVertexArray(_vao);
+    GLuint lastTexture = 0;
+    for (const auto& batch : _renderBatches) {
+        if (batch.texture != lastTexture) {
+            glBindTexture(GL_TEXTURE_2D, batch.texture);
+            lastTexture = batch.texture;
         }
-        // std::random_device::result_type seed = std::random_device()();
-        // std::mt19937 randomEngine(seed);
-        Vertex vertexData[6];
-
-        //First Triangle
-        vertexData[0].setPos(x + width, y + height);
-        vertexData[0].setUV(1.0f, 1.0f);
-
-        vertexData[1].setPos(x, y + height);
-        vertexData[1].setUV(0.0f, 1.0f);
-
-        vertexData[2].setPos(x, y);
-        vertexData[2].setUV(0.0f, 0.0f);
-
-        // Second Triangle
-        vertexData[3].setPos(x, y);
-        vertexData[3].setUV(0.0f, 0.0f);
-
-        vertexData[4].setPos(x + width, y);
-        vertexData[4].setUV(1.0f, 0.0f);
-
-        vertexData[5].setPos(x + width, y + height);
-        vertexData[5].setUV(1.0f, 1.0f);
-
-        for (int i = 0; i < 6; i++) {
-            vertexData[i].setColor(200, 100, 150, 128);
-        }
-        vertexData[1].setColor(100, 150, 100, 255);
-        vertexData[4].setColor(150, 200, 100, 128);
-
-
-        // Bind gl Buffer
-        glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-
-        // Upload data to buffer
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-
-        // Unbind gl Buffer
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glDrawArrays(GL_TRIANGLES, batch.offset, batch.numVertices);
     }
-
-    void Sprite::draw() {
-        // bind texture
-        glBindTexture(GL_TEXTURE_2D, _texture.id);
-
-        //bind the buffer object
-        glBindBuffer(GL_ARRAY_BUFFER, _vboID);
-
-        glEnableVertexAttribArray(0);
-
-        // Position Attribute pointer // (void*)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-
-        glDrawArrays( GL_TRIANGLES, 0, 6);
-
-        //disable the vertex attribute
-        glDisableVertexAttribArray(0);
-
-        // Unbind the buffer
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-
+    glBindVertexArray(0);
 }

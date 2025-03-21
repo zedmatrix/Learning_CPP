@@ -2,34 +2,33 @@
 #define GLSLPROGRAM_HPP
 #include <GL/glew.h>
 #include <string>
-#include "Error.hpp"
+#include <fstream>
+#include <cstdio>
+#include <vector>
+#include <print>
 
-namespace zengine {
+class GLSLProgram {
 
-    class GLSLProgram {
+public:
 
-    public:
+    GLSLProgram();
+    ~GLSLProgram();
 
-        GLSLProgram();
-        ~GLSLProgram();
+    void compileShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+    void linkShaders();
+    void addAttribute(const std::string& attributeName);
+    GLuint getUniformLocation(const std::string& uniformName);
 
-        void compileShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-        void linkShaders();
-        void addAttribute(const std::string& attributeName);
-        GLuint getUniformLocation(const std::string& uniformName);
+    void use();
+    void unuse();
 
-        void use();
-        void unuse();
+private:
+    void compile(const std::string& filePath, GLuint id);
+    int _numAttributes;
+    GLuint _programID;
+    GLuint _vertexShaderID;
+    GLuint _fragmentShaderID;
 
-    private:
-        void compile(const std::string& filePath, GLuint id);
-        int _numAttributes;
-        GLuint _programID;
-        GLuint _vertexShaderID;
-        GLuint _fragmentShaderID;
-
-    };
-
-}
+};
 
 #endif //GLSLPROGRAM_HPP

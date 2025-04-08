@@ -20,6 +20,7 @@ cd Learning_CPP
 ```
 cd Box2d
 mkdir -v build
+cd build
 meson setup ..
 ninja
 cp -rv ../assets .

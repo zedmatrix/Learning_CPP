@@ -1,6 +1,8 @@
 #include "SpriteBatch.hpp"
+#include <iostream>
 
-Glyph::Glyph(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint Texture, float Depth, const ColorRGBA8& color) :
+Glyph::Glyph(const glm::vec4& destRect, const glm::vec4& uvRect,
+             GLuint Texture, float Depth, const ColorRGBA8& color) :
     texture(Texture),
     depth(Depth) {
 
@@ -19,9 +21,11 @@ Glyph::Glyph(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint Texture,
     topRight.color = color;
     topRight.setPosition(destRect.x + destRect.z, destRect.y + destRect.w);
     topRight.setUV(uvRect.x + uvRect.z, uvRect.y + uvRect.w);
+    //std::cout << "UVrect: " << uvRect.z << "," << uvRect.w << std::endl;
 }
 
-Glyph::Glyph(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint Texture, float Depth, const ColorRGBA8& color, float angle) :
+Glyph::Glyph(const glm::vec4& destRect, const glm::vec4& uvRect,
+             GLuint Texture, float Depth, const ColorRGBA8& color, float angle) :
     texture(Texture),
     depth(Depth) {
 
@@ -54,6 +58,8 @@ Glyph::Glyph(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint Texture,
     topRight.color = color;
     topRight.setPosition(destRect.x + tR.x, destRect.y + tR.y);
     topRight.setUV(uvRect.x + uvRect.z, uvRect.y + uvRect.w);
+    //std::cout << "UVrect: " << uvRect.z << "," << uvRect.w << std::endl;
+
 }
 glm::vec2 Glyph::rotatePoint(const glm::vec2& pos, float angle) {
     glm::vec2 newV;
@@ -125,7 +131,7 @@ void SpriteBatch::createRenderBatches() {
     for (size_t currentGlyph = 1; currentGlyph < m_glyphs.size(); currentGlyph++) {
 
         if (m_glyphs[currentGlyph].texture != m_glyphs[currentGlyph - 1].texture) {
-            m_renderBatches.emplace_back(offset, 6, m_glyphs[0].texture);
+            m_renderBatches.emplace_back(offset, 6, m_glyphs[currentGlyph].texture);
         } else {
             m_renderBatches.back().numVertices += 6;
         }

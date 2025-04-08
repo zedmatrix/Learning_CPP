@@ -11,7 +11,12 @@ public:
     GLSLProgram();
     ~GLSLProgram();
 
+    // Compile Shader from files
     void compileShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+
+    // Compile Shader from in-line source
+    void compileShadersFromSource(const char* vertexSource, const char* fragmentSource);
+
     void linkShaders();
     void addAttribute(const std::string& attributeName);
     GLuint getUniformLocation(const std::string& uniformName);
@@ -20,7 +25,8 @@ public:
     void unuse();
 
 private:
-    void compile(const std::string& filePath, GLuint id);
+    void compileShader(const char* source, const std::string& ident, GLuint id);
+
     int m_numAttributes;
     GLuint m_programID;
     GLuint m_vertexShaderID;

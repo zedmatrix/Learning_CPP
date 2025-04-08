@@ -9,6 +9,8 @@
 #include "SpriteBatch.hpp"
 #include "Camera.hpp"
 #include "GLSLProgram.hpp"
+#include "Player.hpp"
+#include "DebugRenderer.hpp"
 
 class GameScreens : public IGameScreen {
 
@@ -36,6 +38,10 @@ private:
     GLTexture m_texture;
     std::vector<Box> m_boxes;
     std::unique_ptr<b2World> m_world;
+
+    Player m_player;
+    DebugRenderer m_debugRenderer;
+    bool m_renderDebug = false;
 
 };
 

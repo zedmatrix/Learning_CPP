@@ -7,31 +7,46 @@
 #include "Vertex.hpp"
 #include "SpriteBatch.hpp"
 #include "GLTexture.hpp"
+#include "DebugRenderer.hpp"
+
+class Capsule {
+public:
+    Capsule();
+
+    void init(b2World* world,
+              const glm::vec2& position,
+              const glm::vec2& dimensions,
+              float density,
+              float friction,
+              bool fixedRotation = true);
+
+    void drawDebug(DebugRenderer& debugRenderer);
+    b2Body* getBody() const { return m_body; }
+    b2Fixture* getFixture(int index) const { return m_fixtures[index]; }
+    const glm::vec2& getDimensions() const { return m_dimensions; }
+
+private:
+    b2Body* m_body = nullptr;
+    b2Fixture* m_fixtures[3];
+    glm::vec2 m_dimensions;
+
+};
+
 
 class Box {
 
 public:
     Box();
-    ~Box();
 
-    void init(b2World* world,const glm::vec2& position, const glm::vec2& dimensions, ColorRGBA8 color, float angle = 0.0f);
+    void init(b2World* world,const glm::vec2& position, const glm::vec2& dimensions,
+               GLTexture texture, ColorRGBA8 color,
+               bool isDynamic,
+               bool fixedRotation,
+               float angle = 0.0f,
+               glm::vec4 uvRect = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 
-    // void init(b2World* world,
-    //           const glm::vec2& position,
-    //           const glm::vec2& dimensions,
-    //           GLTexture texture,
-    //           ColorRGBA8 color,
-    //           bool fixedRotation,
-    //           bool isDynamic,
-    //           float angle = 0.0f,
-    //           glm::vec4 uvRect = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-
-    // void destroy(b2World* world);
-    //
-    // void draw(SpriteBatch& spriteBatch);
-
-    bool isDynamic() const { return m_body->GetType() == b2_dynamicBody;}
-
+    void draw(SpriteBatch& spriteBatch);
+    bool isDynamic() const { return m_body->GetType() == b2_dynamicBody; }
     // Test if a point is inside the box
     bool testPoint(float x, float y) const { return m_fixture->TestPoint(b2Vec2(x, y)); }
 
@@ -44,8 +59,8 @@ public:
     const ColorRGBA8& getColor()         const { return m_color; }
     float             getAngle()         const { return m_body->GetAngle(); }
     const GLTexture&  getTexture()       const { return m_texture; }
-    const bool&       getFixedRotation() const { return m_fixedRotation; }
-    const bool&       getIsDynamic()     const { return m_isDynamic; }
+    // const bool&       getFixedRotation() const { return m_fixedRotation; }
+    // const bool&       getIsDynamic()     const { return m_isDynamic; }
 private:
     glm::vec4 m_uvRect;
     b2Body* m_body = nullptr;
@@ -55,6 +70,7 @@ private:
     GLTexture m_texture;
     bool m_fixedRotation;
     bool m_isDynamic;
+
 };
 
 #endif //BOX2D_HPP

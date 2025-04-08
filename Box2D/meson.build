@@ -13,6 +13,8 @@ srcdir = files(
     'IMainGame.cpp',
     'IMainWindow.cpp',
     'IScreenList.cpp',
+    'Player.cpp',
+    'bengine/DebugRenderer.cpp',
     'bengine/ResourceManager.cpp',
     'bengine/GLSLProgram.cpp',
     'bengine/SpriteBatch.cpp',

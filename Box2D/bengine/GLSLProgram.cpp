@@ -4,6 +4,7 @@
 #include <print>
 #include <string>
 #include "GLSLProgram.hpp"
+#include "IOManager.hpp"
 
 GLSLProgram::GLSLProgram() : m_numAttributes(0), m_programID(0), m_vertexShaderID(0), m_fragmentShaderID(0) {
     //Empty
@@ -26,6 +27,16 @@ void GLSLProgram::unuse() {
 }
 
 void GLSLProgram::compileShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) {
+    std::string vertSource;
+    std::string fragSource;
+
+    IOManager::readFileToBuffer(vertexShaderPath, vertSource);
+    IOManager::readFileToBuffer(fragmentShaderPath, fragSource);
+
+    compileShadersFromSource(vertSource.c_str(), fragSource.c_str());
+}
+
+void GLSLProgram::compileShadersFromSource(const char* vertexSource, const char* fragmentSource) {
     m_programID = glCreateProgram();
     m_vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     if (m_vertexShaderID == 0) {
@@ -36,30 +47,14 @@ void GLSLProgram::compileShaders(const std::string& vertexShaderPath, const std:
     if (m_fragmentShaderID == 0) {
         fatalError("Fragment Shader Failed to be Created!");
     }
-
-    compile(vertexShaderPath, m_vertexShaderID);
-    compile(fragmentShaderPath, m_fragmentShaderID);
+    compileShader(vertexSource, "Vertex Shader", m_vertexShaderID);
+    compileShader(fragmentSource, "Fragment Shader", m_fragmentShaderID);
 }
 
-void GLSLProgram::compile(const std::string& filePath, GLuint id) {
-    //Open and Load Files
-    std::ifstream file(filePath);
-    if (file.fail()) {
-        std::perror(filePath.c_str());
-        fatalError("Failed to Open: " + filePath);
-    }
-
-    std::string fileContents{};
-    std::string line{};
-
-    while (std::getline(file, line)) {
-        fileContents += line + "\n";
-    }
-    file.close();
-
+void GLSLProgram::compileShader(const char* source, const std::string& ident, GLuint id) {
     //compile shader
-    const char* contentsPtr = fileContents.c_str();
-    glShaderSource(id, 1, &contentsPtr, nullptr);
+    glShaderSource(id, 1, &source, nullptr);
+
     glCompileShader(id);
     GLint success = 0;
     glGetShaderiv(id, GL_COMPILE_STATUS, &success);
@@ -71,10 +66,10 @@ void GLSLProgram::compile(const std::string& filePath, GLuint id) {
         glGetShaderInfoLog(id, maxLength, &maxLength, &errorLog[0]);
         glDeleteShader(id);
         std::print("{}\n", &errorLog[0]);
-        fatalError("Shader " + filePath + "Failed to Compile");
+        fatalError("Shader " + ident + "Failed to Compile");
     }
-
 }
+
 void GLSLProgram::addAttribute(const std::string& attributeName) {
     glBindAttribLocation(m_programID, m_numAttributes, attributeName.c_str());
     m_numAttributes++;

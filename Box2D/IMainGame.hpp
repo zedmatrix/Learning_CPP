@@ -23,6 +23,7 @@ public:
     virtual void onExit() = 0;
 
     const float getFps() { return m_fps; }
+    InputManager inputManager;
 
 protected:
     virtual void update();
@@ -37,7 +38,6 @@ protected:
     bool m_isRunning = false;
     float m_fps = 0.0f;
     IMainWindow m_window;
-    InputManager m_inputManager;
 
 private:
     std::string m_title = "Demo";

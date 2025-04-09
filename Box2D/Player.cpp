@@ -45,12 +45,14 @@ void Player::draw(SpriteBatch& spriteBatch) {
     destRect.z = m_drawDims.x;
     destRect.w = m_drawDims.y;
 
+    m_animSpeed = 0.4f;
+
     animation(body);
 
     m_animTime += m_animSpeed;
-    // if (m_animTime > m_numTiles) {
-    //     m_isPunching = false;
-    // }
+    if (m_animTime > m_numTiles) {
+        m_isPunching = false;
+    }
 
     m_tileIndex = m_tileIndex + (int)m_animTime % m_numTiles;
 
@@ -73,7 +75,6 @@ void Player::animation(b2Body* body) {
         if (m_isPunching) {
             m_tileIndex = 11;
             m_numTiles = 4;
-            m_animSpeed *= 0.2f;
             if (m_moveState != PlayerMoveState::PUNCHING) {
                 m_moveState = PlayerMoveState::PUNCHING;
                 m_animTime = 0.0f;
@@ -139,6 +140,8 @@ void Player::update(InputManager& inputManager) {
     }
     if (inputManager.isKeyPressed(SDLK_SPACE)) {
         m_isPunching = true;
+    } else if (!inputManager.isKeyPressed(SDLK_SPACE)) {
+        m_isPunching = false;
     }
     // Set Max X Velocity
     float MAX_SPEED = 10.0f;
@@ -167,7 +170,6 @@ void Player::update(InputManager& inputManager) {
                 m_onGround = true;
                 if (inputManager.isKeyDown(SDLK_UP)) {
                     body->ApplyLinearImpulse(b2Vec2(0.0f, 20.0f), b2Vec2(0.0f, 0.0f), true);
-                    m_isPunching = false;
                     break;
                 }
             }

@@ -69,6 +69,14 @@ void GameScreens::onEntry() {
     m_textureProgram.addAttribute("vertexColor");
     m_textureProgram.addAttribute("vertexUV");
     m_textureProgram.linkShaders();
+    // Compile our light program
+    m_lightProgram.compileShaders("assets/VertexLight", "assets/FragmentLight");
+    m_lightProgram.addAttribute("vertexPosition");
+    m_lightProgram.addAttribute("vertexColor");
+    m_lightProgram.addAttribute("vertexUV");
+    m_lightProgram.linkShaders();
+
+
     m_camera.init(m_window->getScreenWidth(), m_window->getScreenHeight());
     m_camera.setScale(16.0f);
 
@@ -137,6 +145,34 @@ void GameScreens::draw() {
         m_debugRenderer.end();
         m_debugRenderer.render(projectionMatrix, 2.0f);
     }
+    // Additive Blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Render Some Test Lights
+    Light playerLight;
+    playerLight.color = ColorRGBA8(255, 128, 255, 200);
+    playerLight.position = m_player.getPosition();
+    playerLight.size = 30.0f;
+
+    Light mouseLight;
+    mouseLight.color = ColorRGBA8(128, 255, 128, 128);
+    mouseLight.position = m_camera.getWorldCoords(m_game->inputManager.getMouseCoords());
+    mouseLight.size = 45.0f;
+
+    m_lightProgram.use();
+    pUniform = m_textureProgram.getUniformLocation("P");
+    glUniformMatrix4fv(pUniform, 1, GL_FALSE, &projectionMatrix[0][0]);
+    m_spriteBatch.begin();
+
+    playerLight.draw(m_spriteBatch);
+    mouseLight.draw(m_spriteBatch);
+
+    m_spriteBatch.end();
+    m_spriteBatch.renderBatch();
+    m_lightProgram.unuse();
+    // reset to regular alpha blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 }
 void GameScreens::checkInput() {
     SDL_Event evnt;

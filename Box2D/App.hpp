@@ -34,6 +34,7 @@ private:
     IMainWindow* m_window;
     SpriteBatch m_spriteBatch;
     GLSLProgram m_textureProgram;
+    GLSLProgram m_lightProgram;
     Camera m_camera;
     GLTexture m_texture;
     std::vector<Box> m_boxes;
